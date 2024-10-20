@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Presença - Treinamento de Segurança</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        canvas { border: 1px solid #000; }
+        .signature-container { margin: 20px 0; }
+        label { display: block; margin: 10px 0 5px; }
+    </style>
+</head>
+<body>
+
+<h1>Lista de Presença do Treinamento de Segurança</h1>
+<form id="attendanceForm">
+    <label>Título do Treinamento:</label>
+    <input type="text" name="trainingTitle" value="Treinamento de Segurança" required><br><br>
+    
+    <label>Conteúdo Programático:</label>
+    <textarea name="content" required>
+1. Introdução à Segurança no Trabalho
+2. Identificação de Riscos
+3. Medidas de Prevenção
+4. Equipamentos de Proteção Individual (EPIs)
+5. Primeiros Socorros
+    </textarea><br><br>
+    
+    <label>Carga Horária:</label>
+    <input type="text" name="duration" value="1 hora" required><br><br>
+    
+    <label>Nome do Instrutor:</label>
+    <input type="text" name="instructorName" required><br><br>
+    
+    <label>Nome do Colaborador:</label>
+    <input type="text" name="employeeName" required><br><br>
+    
+    <label>RG:</label>
+    <input type="text" name="rg" required><br><br>
+    
+    <label>CPF:</label>
+    <input type="text" name="cpf" required><br><br>
+    
+    <label>Email:</label>
+    <input type="email" name="email" required><br><br>
+    
+    <label>Gestor:</label>
+    <input type="text" name="manager" required><br><br>
+    
+    <label>Setor:</label>
+    <input type="text" name="sector" required><br><br>
+    
+    <div class="signature-container">
+        <label>Assinatura Digital:</label><br>
+        <canvas id="signatureCanvas" width="400" height="200"></canvas><br>
+        <button type="button" id="clearButton">Limpar</button>
+    </div>
+    
+    <button type="submit">Enviar</button>
+</form>
+
+<script>
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', () => { drawing = true; });
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', draw);
+    
+    function draw(event) {
+        if (!drawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'black';
+        ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+    }
+    
+    document.getElementById('clearButton').addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const dataURL = canvas.toDataURL();
+        const formData = new FormData(this);
+        formData.append('signature', dataURL);
+        
+        // Enviar os dados para o Google Apps Script
+        fetch('https://script.google.com/macros/s/AKfycbypW3Afk2tOkKLFdWe4zt21eowmsU4OFpJ-8jH1oUuvoDXtTjizUWczNtrj9bu-a3W7/exec', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Formulário enviado com sucesso!');
+            console.log(data);
+        })
+        .catch(error => console.error('Erro ao enviar o formulário:', error));
+    });
+</script>
+
+</body>
+</html>
